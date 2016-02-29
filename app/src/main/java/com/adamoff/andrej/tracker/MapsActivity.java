@@ -27,6 +27,7 @@ import java.util.logging.LogRecord;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     // FragmentActivity вместо Activity нужно для поддержки Support...
 
+
     private GoogleMap mMap;
     double lat, lat0, lng, lng0;
     SupportMapFragment mapFragment;
