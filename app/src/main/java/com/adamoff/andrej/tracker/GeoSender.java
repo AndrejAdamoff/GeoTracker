@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.telephony.SmsManager;
@@ -22,18 +23,34 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class GeoSender extends ActionBarActivity {
 
-    TextView etphone, etperiod, sendperiod, txtloc, txtsat;
+    TextView txtloc, txtsat;
+    EditText etphone, etperiod, sendperiod;
     String phone, period, sndperiod;
+
     boolean n,m;
+    int smsNumber;
 
     LocationManager lm;
     LocationListener listener;
     GpsStatus.NmeaListener nmealistener;
+
+  //  ArrayList<String> M;
+
+    BufferedOutputStream bos; // = new BufferedOutputStream(fos);
+    OutputStreamWriter out;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,21 +91,29 @@ public class GeoSender extends ActionBarActivity {
             public void onNmeaReceived(long l, String s) {
                 //  final String sentence = "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A";
                 System.out.println("nmea: " + s);
-                if (n) {  // if timer finished, if not then exit
+                if (n) {  // if timer finished. If not then exit
                     if (s.startsWith("$GPRMC")) {
-                        // start new timer:
+                        n = false;
+                    // save to log:
+                     try {
+                         out.write(s);
+                     }
+                        catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    // start new timer:
                         new CountDownTimer(Integer.parseInt(period) * 1000, Integer.parseInt(period) * 1000) {
                             @Override
                             public void onTick(long l) {
                                 n = true;
                             }
-
                             @Override
                             public void onFinish() {
                                 n = true;
                             }
                         }.start();
 
+                    // displaying coordinates on screen:
                         String[] strValues = s.split(",");
                         double latitude = Double.parseDouble(strValues[3]) * .01;
                         if (strValues[4].charAt(0) == 'S') {
@@ -102,26 +127,26 @@ public class GeoSender extends ActionBarActivity {
                         txtloc.setText("Lat: " + latitude + "\n" + "Long: " + longitude + "\n" + "course: " + course);
                         //        System.out.println("latitude="+latitude+" ; longitude="+longitude+" ; course = "+course);
 
-                        addtolog(s);  // write s string to log
-                        if (m){
+                    // check whether have to send SMS:
+                        if (m){  // have to send SMS
+                            m=false;
                             // start new timer:
                             new CountDownTimer(Integer.parseInt(sndperiod) * 1000*60, Integer.parseInt(sndperiod) * 1000*60) {
                                 @Override
                                 public void onTick(long l) {
                                     m = true;
                                 }
-
                                 @Override
                                 public void onFinish() {
                                     m = true;
                                 }
                             }.start();
-                            sendlog;
-                            m = false;
 
+                     Toast.makeText(GeoSender.this, "Sending SMS",Toast.LENGTH_LONG).show();
+      //                      sendSMS(phone, s);   // send log by SMS
+                            smsNumber++;
                         }
 
-                        n = false;
                     } else { // if not GPRMC
 
                         //   txt2.setText(s);
@@ -142,6 +167,9 @@ public class GeoSender extends ActionBarActivity {
         startwithlog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+    //            M = new ArrayList<String>();
+
                 phone = etphone.getText().toString();
                 period = etperiod.getText().toString();
                 sndperiod = sendperiod.getText().toString();
@@ -152,27 +180,21 @@ public class GeoSender extends ActionBarActivity {
              //   try  lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, listener);
 
                 // open log file
-
+              try {  File logfile = new File(Environment.getExternalStorageDirectory(),"GeoLog.txt");
+                     FileOutputStream fos = new FileOutputStream(logfile);
+                     BufferedOutputStream bos = new BufferedOutputStream(fos);
+                     OutputStreamWriter out = new OutputStreamWriter(bos);}
+              catch (Exception e){
+                     e.printStackTrace();
+              }
 
                 //
-
                   lm.addNmeaListener(nmealistener); // nmealistener starts
 
-                  n= true;
-                  m = true;
-
+                  n= true; // allow to start timer
+                  m = true; // allow to start timer
+                  smsNumber = 0;
               //  catch (SecurityException s) {s.printStackTrace();}
-
-                new CountDownTimer(Integer.parseInt(period)*1000, Integer.parseInt(period)*1000){
-                    @Override
-                    public void onTick(long l) {
-                        n = true;
-                    }
-                    @Override
-                    public void onFinish() {
-                        n = true;
-                    }
-                }.start();
 
             }
         });
@@ -183,7 +205,18 @@ public class GeoSender extends ActionBarActivity {
            //     try {lm.removeUpdates(listener);
                     lm.removeNmeaListener(nmealistener);
 
+                //save log in a file:
+              //     try {saveFile(M, "GeoLog.txt");}
+              //     catch (Exception e){e.printStackTrace();}
+
                 // close and save log file
+                try {
+                    out.close();
+                    bos.flush();
+                    bos.close();
+                } catch (Exception e) {e.printStackTrace();}
+
+
 
             }
           //      catch (SecurityException s) {
@@ -199,6 +232,33 @@ public class GeoSender extends ActionBarActivity {
 
     }
 
+    private void addtoLog (String s){
+
+
+
+    }
+
+    private void sendLog(String[] s){
+
+
+    }
+
+    private void saveFile(ArrayList<String> M, String filename) throws IOException, FileNotFoundException {
+        File logfile = new File(Environment.getExternalStorageDirectory(),filename);
+
+        FileOutputStream fos = new FileOutputStream(logfile);
+        BufferedOutputStream bos = new BufferedOutputStream(fos);
+     //   BufferedInputStream bis = new BufferedInputStream(input);
+    //    int aByte;
+        OutputStreamWriter out = new OutputStreamWriter(bos);
+
+       for (int i =0; i<M.size(); i++)  {
+            out.write(M.get(i));
+        }
+        out.close();
+        bos.flush();
+        bos.close();
+    }
 
     /*
     Runnable mRunnable = new Runnable() {
@@ -233,7 +293,7 @@ public class GeoSender extends ActionBarActivity {
 
 
 
-    public void sendSMS (String phoneNumber, String lat, String lng){
+    public void sendSMS (String phoneNumber, String message ){
 
         String SENT="SMS_SENT";
         String DELIVERED="SMS_DELIVERED";
@@ -275,8 +335,13 @@ public class GeoSender extends ActionBarActivity {
         }, new IntentFilter(SENT));
 
         SmsManager sms = SmsManager.getDefault();
-        //   sms.sendTextMessage(phoneNumber,null, message, sentPI, deliveredPI);
-        String message = "lat:"+lat+"lng:"+lng;
+        sms.sendTextMessage(phoneNumber,null, message, sentPI, deliveredPI);
+
+      //  String message = String.valueOf(smsNumber);
+      //  for (int i=0; i<M.size(); i++){
+      //      message = message+M.get(i);
+      //  }
+
         sms.sendTextMessage(phoneNumber, null, message, sentPI, null);
         //         ContentValues values = new ContentValues();
         //         values.put("address", phoneNumber); // phone number to send
