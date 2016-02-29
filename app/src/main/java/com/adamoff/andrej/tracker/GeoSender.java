@@ -14,6 +14,7 @@ import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +24,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,10 +31,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 
-public class GeoSender extends ActionBarActivity {
+public class GeoSender extends AppCompatActivity {
 
     TextView txtloc, txtsat;
     EditText etphone, etperiod, sendperiod;
@@ -49,13 +48,14 @@ public class GeoSender extends ActionBarActivity {
 
   //  ArrayList<String> M;
 
-    BufferedOutputStream bos; // = new BufferedOutputStream(fos);
+    FileOutputStream fos;
+ //   BufferedOutputStream bos; // = new BufferedOutputStream(fos);
     OutputStreamWriter out;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_GeoSender);
+        setContentView(R.layout.activity_geosender);
 
         //   phone = "+381612751056";
 
@@ -142,9 +142,10 @@ public class GeoSender extends ActionBarActivity {
                                 }
                             }.start();
 
-                     Toast.makeText(GeoSender.this, "Sending SMS",Toast.LENGTH_LONG).show();
-      //                      sendSMS(phone, s);   // send log by SMS
+         //            Toast.makeText(GeoSender.this, "Sending SMS",Toast.LENGTH_LONG).show();
                             smsNumber++;
+                            sendSMS(phone, s);   // send log by SMS
+
                         }
 
                     } else { // if not GPRMC
@@ -181,9 +182,9 @@ public class GeoSender extends ActionBarActivity {
 
                 // open log file
               try {  File logfile = new File(Environment.getExternalStorageDirectory(),"GeoLog.txt");
-                     FileOutputStream fos = new FileOutputStream(logfile);
-                     BufferedOutputStream bos = new BufferedOutputStream(fos);
-                     OutputStreamWriter out = new OutputStreamWriter(bos);}
+                       fos = new FileOutputStream(logfile);
+               //      bos = new BufferedOutputStream(fos);
+                     out = new OutputStreamWriter(fos);}
               catch (Exception e){
                      e.printStackTrace();
               }
@@ -212,8 +213,8 @@ public class GeoSender extends ActionBarActivity {
                 // close and save log file
                 try {
                     out.close();
-                    bos.flush();
-                    bos.close();
+                  //  bos.flush();
+                    fos.close();
                 } catch (Exception e) {e.printStackTrace();}
 
 
@@ -311,7 +312,7 @@ public class GeoSender extends ActionBarActivity {
                 switch(getResultCode())
                 {
                     case Activity.RESULT_OK:
-                        Toast.makeText(getBaseContext(), "SMS sent",
+                        Toast.makeText(getBaseContext(), smsNumber+" SMS sent",
                                 Toast.LENGTH_LONG).show();
                         break;
                     case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
@@ -371,7 +372,7 @@ public class GeoSender extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_GeoSender, menu);
+        getMenuInflater().inflate(R.menu.activity_geosender, menu);
         return true;
     }
 
