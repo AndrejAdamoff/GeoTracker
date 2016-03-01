@@ -14,7 +14,8 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:hint="enter phone number"
-        android:textSize="18dp" />
+        android:textSize="18dp"
+        android:inputType="phone" />
 
     <EditText
         android:layout_width="match_parent"
@@ -25,7 +26,8 @@
         android:textSize="18dp"
         android:layout_below="@+id/etphone"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:inputType="number" />
 
     <EditText
         android:layout_width="match_parent"
@@ -36,7 +38,8 @@
         android:textSize="18dp"
         android:layout_below="@+id/etperiod"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:inputType="number" />
 
     <LinearLayout
         android:orientation="horizontal"
