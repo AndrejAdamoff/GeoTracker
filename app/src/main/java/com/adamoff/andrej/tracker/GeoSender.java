@@ -12,7 +12,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
@@ -35,9 +34,11 @@ import java.util.ArrayList;
 
 public class GeoSender extends AppCompatActivity {
 
-    TextView txtloc, txtsat;
+    TextView txtlat, txtlong, prec, satnmb, gpsstat;
     EditText etphone, etperiod, sendperiod;
     String phone, period, sndperiod;
+    String gpsstatus;
+
 
     boolean n,m;
     int smsNumber;
@@ -92,40 +93,50 @@ public class GeoSender extends AppCompatActivity {
                 //  final String sentence = "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A";
                 System.out.println("nmea: " + s);
                 if (n) {  // if timer finished. If not then exit
-                    if (s.startsWith("$GPRMC")) {
-                        n = false;
-                    // save to log:
-                     try {
-                         out.write(s);
-                     }
-                        catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    // start new timer:
-                        new CountDownTimer(Integer.parseInt(period) * 1000, Integer.parseInt(period) * 1000) {
-                            @Override
-                            public void onTick(long l) {
-                                n = true;
-                            }
-                            @Override
-                            public void onFinish() {
-                                n = true;
-                            }
-                        }.start();
 
-                    // displaying coordinates on screen:
+                // save NMEA sentence to log:
+                    try {
+                        out.write(s);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    n = false;
+                // start new timer:
+                    new CountDownTimer(Integer.parseInt(period) * 1000, Integer.parseInt(period) * 1000) {
+                        @Override
+                        public void onTick(long l) {
+                            n = true;
+                        }
+                        @Override
+                        public void onFinish() {
+                            n = true;
+                        }
+                    }.start();
+
+                // displaying coordinates:
+                    if (s.startsWith("$GPGGA")) {
                         String[] strValues = s.split(",");
-                        double latitude = Double.parseDouble(strValues[3]) * .01;
-                        if (strValues[4].charAt(0) == 'S') {
+                        double latitude = Double.parseDouble(strValues[2]) * .01;
+                        if (strValues[3].charAt(0) == 'S') {
                             latitude = -latitude;
                         }
-                        double longitude = Double.parseDouble(strValues[5]) * .01;
-                        if (strValues[6].charAt(0) == 'W') {
+                        double longitude = Double.parseDouble(strValues[4]) * .01;
+                        if (strValues[5].charAt(0) == 'W') {
                             longitude = -longitude;
                         }
-                        double course = Double.parseDouble(strValues[8]);
-                        txtloc.setText("Lat: " + latitude + "\n" + "Long: " + longitude + "\n" + "course: " + course);
-                        //        System.out.println("latitude="+latitude+" ; longitude="+longitude+" ; course = "+course);
+                        double precise = Double.parseDouble(strValues[8]);
+
+                        if (strValues[6].equals("0")) gpsstatus = "GPS not fixed";
+                        if (strValues[6].equals("1")) gpsstatus = "GPS fixed";
+                        if (strValues[6].equals("2")) gpsstatus = "Differential GPS fix";
+
+                        txtlat.setText("Lat: " + latitude);
+                        txtlong.setText("Long: " + longitude);
+                        gpsstat.setText("GPS status: " + gpsstatus);
+                        satnmb.setText("Number of satellites: " + strValues[7]);
+                        prec.setText("HDOP: " + precise);
 
                     // check whether have to send SMS:
                         if (m){  // have to send SMS
@@ -144,11 +155,10 @@ public class GeoSender extends AppCompatActivity {
 
          //            Toast.makeText(GeoSender.this, "Sending SMS",Toast.LENGTH_LONG).show();
                             smsNumber++;
-                            sendSMS(phone, s);   // send log by SMS
-
+                            sendSMS(phone, s);   // send NMEA string by SMS
                         }
 
-                    } else { // if not GPRMC
+                    } else { // if not GPGGA
 
                         //   txt2.setText(s);
                     }
@@ -156,13 +166,16 @@ public class GeoSender extends AppCompatActivity {
             }
         };
 
-        txtloc = (TextView)findViewById(R.id.txtloc);
-        txtsat = (TextView)findViewById(R.id.txtsat);
+        txtlat = (TextView)findViewById(R.id.txtlat);
+        txtlong = (TextView)findViewById(R.id.txtlong);
+        prec = (TextView)findViewById(R.id.prec);
+        gpsstat = (TextView)findViewById(R.id.gpsstat);
+        satnmb = (TextView)findViewById(R.id.satnmb);
         etphone = (EditText)findViewById(R.id.etphone);
         etperiod = (EditText)findViewById(R.id.etperiod);
         sendperiod = (EditText)findViewById(R.id.etsendperiod);
         Button startwithlog = (Button)findViewById(R.id.startwithlog);
-        Button startnolog = (Button) findViewById(R.id.startnolog);
+      //  Button startnolog = (Button) findViewById(R.id.startnolog);
         Button stopbtn = (Button)findViewById(R.id.stopbtn);
 
         startwithlog.setOnClickListener(new View.OnClickListener() {
@@ -181,7 +194,7 @@ public class GeoSender extends AppCompatActivity {
              //   try  lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, listener);
 
                 // open log file
-              try {  File logfile = new File(Environment.getExternalStorageDirectory(),"GeoLog.txt");
+              try {  File logfile = new File(Environment.getExternalStorageDirectory()+"/GeoTracker/","GeoLog.txt");
                        fos = new FileOutputStream(logfile);
                //      bos = new BufferedOutputStream(fos);
                      out = new OutputStreamWriter(fos);}
