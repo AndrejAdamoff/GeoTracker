@@ -51,8 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lat0 = -34;
         lng0 = 151;
 
-        txt1 = (TextView)findViewById(R.id.textView);
-        txt2 = (TextView)findViewById(R.id.textView2);
+        txt1 = (TextView)findViewById(R.id.txt1);
+        txt2 = (TextView)findViewById(R.id.txt2);
 
         handler = new Handler(Looper.getMainLooper());
 
@@ -71,9 +71,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
-                if (i == LocationProvider.AVAILABLE)  txt2.setText("Status: available");
-                if (i == LocationProvider.OUT_OF_SERVICE)  txt2.setText("Status: out of service");
-                if (i == LocationProvider.TEMPORARILY_UNAVAILABLE)  txt2.setText("Status: temporarily unavailable");
+                if (i == LocationProvider.AVAILABLE)  txt2.setText("Provider status: available");
+                if (i == LocationProvider.OUT_OF_SERVICE)  txt2.setText("Provider status: out of service");
+                if (i == LocationProvider.TEMPORARILY_UNAVAILABLE)  txt2.setText("Provider status: temporarily unavailable");
               }
 
             @Override
@@ -99,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           try { loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);}
           catch (SecurityException se) {
               se.printStackTrace();
-          };
+          }
             if (loc == null) {
                 Toast.makeText(MapsActivity.this, "Can not get location", Toast.LENGTH_LONG).show();   //{ lat = -34; lng = 151;}
                 mMap.addMarker(new MarkerOptions().position(new LatLng(-34, 151)));
@@ -170,9 +170,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      //  LatLng sydney = new LatLng(loc.getLatitude(), loc.getLongitude());
 
         // Add a marker in Sydney and move the camera
-  //      LatLng sydney = new LatLng(lat0, lng0);
+      //      LatLng sydney = new LatLng(lat0, lng0);
 
-         handler.post(mRunnable);
+  // handler.post(mRunnable);
+
+
     //    mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
     //    mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }

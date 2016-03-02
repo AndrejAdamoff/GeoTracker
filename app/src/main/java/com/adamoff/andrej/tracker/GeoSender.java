@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
@@ -13,6 +15,7 @@ import android.location.LocationManager;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.SmsManager;
 import android.view.Menu;
@@ -29,26 +32,32 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class GeoSender extends AppCompatActivity {
 
-    TextView txtlat, txtlong, prec, satnmb, gpsstat;
+    TextView txtlat, txtlong, prec, satnmb, gpsstat, dist;
     EditText etphone, etperiod, sendperiod;
     String phone, period, sndperiod;
     String gpsstatus;
 
-
     boolean n,m;
     int smsNumber;
+    int smssndint, mindist, locupdperiod;
+    float accuracy;
+    double latitude, longitude;
 
     LocationManager lm;
     LocationListener listener;
     GpsStatus.NmeaListener nmealistener;
+    Location loc;
 
   //  ArrayList<String> M;
 
+    File Geodir;
     FileOutputStream fos;
  //   BufferedOutputStream bos; // = new BufferedOutputStream(fos);
     OutputStreamWriter out;
@@ -61,38 +70,83 @@ public class GeoSender extends AppCompatActivity {
         //   phone = "+381612751056";
 
         lm = (LocationManager)getSystemService(LOCATION_SERVICE);
+
+
+        GpsStatus.Listener gpsstatlist = new GpsStatus.Listener() {
+            @Override
+            public void onGpsStatusChanged(int i) {
+                if (i == GpsStatus.GPS_EVENT_FIRST_FIX) gpsstat.setText("GPS fixed");
+                if (i == GpsStatus.GPS_EVENT_STARTED) gpsstat.setText("GPS started");
+                if (i == GpsStatus.GPS_EVENT_STOPPED) gpsstat.setText("GPS stopped");
+                if (i == GpsStatus.GPS_EVENT_SATELLITE_STATUS) {  //lm.getLastKnownLocation(LocationManager.GPS_PROVIDER).getExtras().getInt("satellites");  //    lm.getGpsStatus().getSatellites() gpsstat.setText("GPS fixed");
+                    int satellitesInFix =0;
+                    int satellites =0;
+                    for (GpsSatellite sat : lm.getGpsStatus(null).getSatellites()) {
+                        if (sat.usedInFix()) {
+                            satellitesInFix++;
+                        }
+                        satellites++;
+                    }
+                    satnmb.setText("Satellites used in fix: "+satellitesInFix+"\n"+"Satellites in total: "+satellites);
+                }
+           }
+        };
+        lm.addGpsStatusListener(gpsstatlist);
+
         //
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
 
+            loc = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+             latitude = loc.getLatitude();
+             longitude = loc.getLongitude();
+             accuracy = loc.getAccuracy();
+         //       Toast.makeText(GeoSender.this, "lat: "+location.getLatitude()+"\n"+"long: "+location.getLongitude(), Toast.LENGTH_LONG).show();
+
+             txtlat.setText("Lat: " + latitude);
+             txtlong.setText("Long: " + longitude);
+       //      gpsstat.setText("GPS status: " + gpsstatus);
+         //    satnmb.setText("Number of satellites: " + loc.ge);
+             prec.setText("Accuracy: " + accuracy);
+
+                if (m) {
+                m=false;
+                smsNumber++;
+                String lat = Double.toString(latitude);
+                String lng = Double.toString(longitude);
+                sendSMS (phone,lat,lng);
+                }
             }
 
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
-
+                gpsstat.setText(s);
             }
 
             @Override
             public void onProviderEnabled(String s) {
-
+                gpsstat.setText(s);
             }
 
             @Override
             public void onProviderDisabled(String s) {
-
+                gpsstat.setText(s);
             }
         };
         // listerner is required to be registered, because GPS receiver doesn't start without it:
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, listener);
+    //    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, listener);
 
         nmealistener = new GpsStatus.NmeaListener() {
 
             @Override
             public void onNmeaReceived(long l, String s) {
+
+  //              double latitude =0, longitude=0, precise=0;
+
                 //  final String sentence = "$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A";
                 System.out.println("nmea: " + s);
-                if (n) {  // if timer finished. If not then exit
+    //            if (n) {  // if timer finished. If not then exit
 
                 // save NMEA sentence to log:
                     try {
@@ -102,7 +156,7 @@ public class GeoSender extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    n = false;
+    /*               n = false;
                 // start new timer:
                     new CountDownTimer(Integer.parseInt(period) * 1000, Integer.parseInt(period) * 1000) {
                         @Override
@@ -114,23 +168,26 @@ public class GeoSender extends AppCompatActivity {
                             n = true;
                         }
                     }.start();
-
-                // displaying coordinates:
+*/
+          /*      // displaying coordinates:
                     if (s.startsWith("$GPGGA")) {
                         String[] strValues = s.split(",");
-                        double latitude = Double.parseDouble(strValues[2]) * .01;
-                        if (strValues[3].charAt(0) == 'S') {
-                            latitude = -latitude;
-                        }
-                        double longitude = Double.parseDouble(strValues[4]) * .01;
-                        if (strValues[5].charAt(0) == 'W') {
-                            longitude = -longitude;
-                        }
-                        double precise = Double.parseDouble(strValues[8]);
+                try {
+                    latitude = Double.parseDouble(strValues[2]) * .01;
+                    if (strValues[3].charAt(0) == 'S') {
+                        latitude = -latitude;
+                    }
+                    longitude = Double.parseDouble(strValues[4]) * .01;
+                    if (strValues[5].charAt(0) == 'W') {
+                        longitude = -longitude;
+                    }
+                    precise = Double.parseDouble(strValues[8]);
 
-                        if (strValues[6].equals("0")) gpsstatus = "GPS not fixed";
-                        if (strValues[6].equals("1")) gpsstatus = "GPS fixed";
-                        if (strValues[6].equals("2")) gpsstatus = "Differential GPS fix";
+                    if (strValues[6].equals("0")) gpsstatus = "GPS not fixed";
+                    if (strValues[6].equals("1")) gpsstatus = "GPS fixed";
+                    if (strValues[6].equals("2")) gpsstatus = "Differential GPS fix";
+                }catch (Exception e){e.printStackTrace();}
+
 
                         txtlat.setText("Lat: " + latitude);
                         txtlong.setText("Long: " + longitude);
@@ -142,7 +199,7 @@ public class GeoSender extends AppCompatActivity {
                         if (m){  // have to send SMS
                             m=false;
                             // start new timer:
-                            new CountDownTimer(Integer.parseInt(sndperiod) * 1000*60, Integer.parseInt(sndperiod) * 1000*60) {
+                            new CountDownTimer(smssndint * 1000*60, smssndint * 1000*60) {
                                 @Override
                                 public void onTick(long l) {
                                     m = true;
@@ -162,7 +219,8 @@ public class GeoSender extends AppCompatActivity {
 
                         //   txt2.setText(s);
                     }
-            }
+                */
+//            }
             }
         };
 
@@ -171,12 +229,23 @@ public class GeoSender extends AppCompatActivity {
         prec = (TextView)findViewById(R.id.prec);
         gpsstat = (TextView)findViewById(R.id.gpsstat);
         satnmb = (TextView)findViewById(R.id.satnmb);
-        etphone = (EditText)findViewById(R.id.etphone);
+     /*   etphone = (EditText)findViewById(R.id.etphone);
         etperiod = (EditText)findViewById(R.id.etperiod);
+        dist = (TextView)findViewById(R.id.mindist);
         sendperiod = (EditText)findViewById(R.id.etsendperiod);
-        Button startwithlog = (Button)findViewById(R.id.startwithlog);
+*/
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        phone = sp.getString("receivingphone", "Receiving phone");
+        locupdperiod = Integer.valueOf(sp.getString("updatetimeinterval","10"));
+        mindist = Integer.valueOf(sp.getString("mindistance", "10"));
+        smssndint = Integer.valueOf(sp.getString("smssendinginterval", "3"));
+
+        final Button startwithlog = (Button)findViewById(R.id.startwithlog);
       //  Button startnolog = (Button) findViewById(R.id.startnolog);
-        Button stopbtn = (Button)findViewById(R.id.stopbtn);
+        final Button stopbtn = (Button)findViewById(R.id.stopbtn);
+        stopbtn.setClickable(false);
+    //    stopbtn.setText("Stopped");
+    //    startwithlog.setText("Start");
 
         startwithlog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,22 +253,35 @@ public class GeoSender extends AppCompatActivity {
 
     //            M = new ArrayList<String>();
 
-                phone = etphone.getText().toString();
-                period = etperiod.getText().toString();
-                sndperiod = sendperiod.getText().toString();
+//                etphone.setText("Rec.phone: "+phone);
+//                etperiod.setText("Loc.update period: "+locupdperiod);
+//                dist.setText("Min.dist: "+ mindist);
+//                sendperiod.setText("SMS sending period: " + smssndint);
+         //       distance = dist.get
                 // listener registration
-                //          try { lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, listener);}
-                //          catch (SecurityException s) {s.printStackTrace();}
+                     //    try {
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, locupdperiod, mindist, listener);
+            //}
+                //         catch (SecurityException s) {s.printStackTrace();}
                 // listener registration
              //   try  lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 10, listener);
 
-                // open log file
-              try {  File logfile = new File(Environment.getExternalStorageDirectory()+"/GeoTracker/","GeoLog.txt");
+             // create folder if needed
+                Geodir = new File(Environment.getExternalStorageDirectory(), "GeoTracker");
+                Geodir.mkdir();
+
+                Toast.makeText(GeoSender.this, "Date: "+getCurrentTimeStamp(),Toast.LENGTH_LONG).show();
+
+             // open log file
+              try {File logfile = new File(Geodir.toString(), "GeoLog_"+getCurrentTimeStamp()+".txt");
                        fos = new FileOutputStream(logfile);
                //      bos = new BufferedOutputStream(fos);
-                     out = new OutputStreamWriter(fos);}
+                     out = new OutputStreamWriter(fos);
+                  Toast.makeText(GeoSender.this, "file is created",Toast.LENGTH_LONG).show();
+              }
               catch (Exception e){
                      e.printStackTrace();
+                 Toast.makeText(GeoSender.this, "file is NOT created",Toast.LENGTH_LONG).show();
               }
 
                 //
@@ -210,13 +292,24 @@ public class GeoSender extends AppCompatActivity {
                   smsNumber = 0;
               //  catch (SecurityException s) {s.printStackTrace();}
 
+                startwithlog.setText("Working...");
+                startwithlog.setClickable(false);
+                stopbtn.setClickable(true);
+                stopbtn.setText("Stop");
+
             }
         });
 
         stopbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-           //     try {lm.removeUpdates(listener);
+           //     try {
+                    stopbtn.setClickable(false);
+                    stopbtn.setText("Stopped");
+                    startwithlog.setText("Start");
+                    startwithlog.setClickable(true);
+
+                    lm.removeUpdates(listener);
                     lm.removeNmeaListener(nmealistener);
 
                 //save log in a file:
@@ -307,7 +400,7 @@ public class GeoSender extends AppCompatActivity {
 
 
 
-    public void sendSMS (String phoneNumber, String message ){
+    public void sendSMS (String phoneNumber, String latitude, String longitude ){
 
         String SENT="SMS_SENT";
         String DELIVERED="SMS_DELIVERED";
@@ -348,6 +441,7 @@ public class GeoSender extends AppCompatActivity {
             }
         }, new IntentFilter(SENT));
 
+        String message = latitude+","+longitude;
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber,null, message, sentPI, deliveredPI);
 
@@ -377,6 +471,16 @@ public class GeoSender extends AppCompatActivity {
         } */
 
         // inter SMS delay timer:
+        new CountDownTimer(smssndint * 1000*60, smssndint * 1000*60) {
+            @Override
+            public void onTick(long l) {
+                m = true;
+            }
+            @Override
+            public void onFinish() {
+                m = true;
+            }
+        }.start();
 
     }
 
@@ -402,5 +506,11 @@ public class GeoSender extends AppCompatActivity {
   //      }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");//dd/MM/yyyy
+        Date now = new Date();
+        return sdfDate.format(now);
     }
 }

@@ -63,8 +63,8 @@
         </activity>
         <activity
             android:name=".GeoSender"
-            android:label="@string/title_activity_activity_sender" >
-
+            android:label="@string/title_activity_activity_sender"
+            android:launchMode="singleTask" >
         </activity>
         <activity
             android:name=".MainActivity"
@@ -74,6 +74,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".SettingsGeoSender"
+            android:label="@string/title_activity_settings_geo_sender"
+            android:theme="@android:style/Theme.Holo" >
         </activity>
     </application>
 

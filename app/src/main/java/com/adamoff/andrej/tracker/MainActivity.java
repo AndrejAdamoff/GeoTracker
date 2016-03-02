@@ -27,7 +27,7 @@ public class MainActivity extends ActionBarActivity {
                 switch (view.getId()){
 
                     case R.id.senderbtn:
-                    startActivity(new Intent(MainActivity.this, GeoSender.class));
+                    startActivity(new Intent(MainActivity.this, SettingsGeoSender.class));
                         break;
 
                     case R.id.mapbtn:
