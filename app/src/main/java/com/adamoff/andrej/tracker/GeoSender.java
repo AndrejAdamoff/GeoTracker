@@ -285,14 +285,14 @@ public class GeoSender extends Activity {
                 Geodir = new File(Environment.getExternalStorageDirectory(), "GeoTracker");
                 Geodir.mkdir();
 
-                Toast.makeText(GeoSender.this, "Date: "+getCurrentTimeStamp(),Toast.LENGTH_LONG).show();
+       //      Toast.makeText(GeoSender.this, "Date: "+getCurrentTimeStamp(),Toast.LENGTH_LONG).show();
 
              // open log file
               try {File logfile = new File(Geodir.toString(), "GeoLog_"+getCurrentTimeStamp()+".txt");
                        fos = new FileOutputStream(logfile);
                //      bos = new BufferedOutputStream(fos);
                      out = new OutputStreamWriter(fos);
-                  Toast.makeText(GeoSender.this, "file is created",Toast.LENGTH_LONG).show();
+                 Toast.makeText(GeoSender.this, "Creating log file:"+"\n"+logfile, Toast.LENGTH_LONG).show();
               }
               catch (Exception e){
                      e.printStackTrace();
