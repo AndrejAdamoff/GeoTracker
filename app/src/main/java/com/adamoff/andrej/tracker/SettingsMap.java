@@ -3,13 +3,24 @@ package com.adamoff.andrej.tracker;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.RingtonePreference;
+import android.text.TextUtils;
+
+
+import java.util.List;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -22,13 +33,8 @@ import android.preference.PreferenceManager;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsGeoSender extends PreferenceActivity {
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        startActivity(new Intent(this, GeoSender.class));
-        finish();
-    }
+public class SettingsMap extends PreferenceActivity {
+
 
     /**
      * Determines whether to always show the simplified settings UI, where
@@ -60,30 +66,32 @@ public class SettingsGeoSender extends PreferenceActivity {
         // use the older PreferenceActivity APIs.
 
         // Add 'general' preferences.
-        addPreferencesFromResource(R.xml.pref_general_sender);
-        bindPreferenceSummaryToValue(findPreference("receivingphone"));
-        bindPreferenceSummaryToValue(findPreference("updatetimeinterval"));
-        bindPreferenceSummaryToValue(findPreference("mindistance"));
-        bindPreferenceSummaryToValue(findPreference("smssendinginterval"));
+        addPreferencesFromResource(R.xml.pref_general_map);
+        bindPreferenceSummaryToValue(findPreference("sendingphone"));
+        bindPreferenceSummaryToValue(findPreference("initialscale"));
+
+    //    bindPreferenceSummaryToValue(findPreference("updatetimeinterval"));
+    //    bindPreferenceSummaryToValue(findPreference("mindistance"));
+   //     bindPreferenceSummaryToValue(findPreference("smssendinginterval"));
         // Add 'notifications' preferences, and a corresponding header.
-  //      PreferenceCategory fakeHeader = new PreferenceCategory(this);
-  //      fakeHeader.setTitle(R.string.pref_header_notifications);
-  //      getPreferenceScreen().addPreference(fakeHeader);
-  //      addPreferencesFromResource(R.xml.pref_notification);
+        //      PreferenceCategory fakeHeader = new PreferenceCategory(this);
+        //      fakeHeader.setTitle(R.string.pref_header_notifications);
+        //      getPreferenceScreen().addPreference(fakeHeader);
+        //      addPreferencesFromResource(R.xml.pref_notification);
 
         // Add 'data and sync' preferences, and a corresponding header.
-  //      fakeHeader = new PreferenceCategory(this);
-  //      fakeHeader.setTitle(R.string.pref_header_data_sync);
-  //      getPreferenceScreen().addPreference(fakeHeader);
-  //      addPreferencesFromResource(R.xml.pref_data_sync);
+        //      fakeHeader = new PreferenceCategory(this);
+        //      fakeHeader.setTitle(R.string.pref_header_data_sync);
+        //      getPreferenceScreen().addPreference(fakeHeader);
+        //      addPreferencesFromResource(R.xml.pref_data_sync);
 
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-   //     bindPreferenceSummaryToValue(findPreference("example_text"));
-   //     bindPreferenceSummaryToValue(findPreference("example_list"));
-   //     bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-   //     bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+        //     bindPreferenceSummaryToValue(findPreference("example_text"));
+        //     bindPreferenceSummaryToValue(findPreference("example_list"));
+        //     bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+        //     bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }
 
     /**
@@ -126,9 +134,9 @@ public class SettingsGeoSender extends PreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.setSummary(stringValue);
+            // For all other preferences, set the summary to the value's
+            // simple string representation.
+            preference.setSummary(stringValue);
 
             return true;
         }
@@ -164,16 +172,24 @@ public class SettingsGeoSender extends PreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general_sender);
+            addPreferencesFromResource(R.xml.pref_general_map);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("receivingphone"));
-            bindPreferenceSummaryToValue(findPreference("updatetimeinterval"));
-            bindPreferenceSummaryToValue(findPreference("mindistance"));
-            bindPreferenceSummaryToValue(findPreference("smssendinginterval"));
+            bindPreferenceSummaryToValue(findPreference("sendingphone"));
+    //        bindPreferenceSummaryToValue(findPreference("updatetimeinterval"));
+    //        bindPreferenceSummaryToValue(findPreference("mindistance"));
+    //        bindPreferenceSummaryToValue(findPreference("smssendinginterval"));
         }
     }
+
+  /*  @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(this, MapsActivity.class).putExtra("mode",getIntent().getStringExtra("mode")));
+        finish();
+    }
+    */
 }

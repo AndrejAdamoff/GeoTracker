@@ -1,0 +1,79 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="initialscale"
+        android:title="Set initial scale"
+        android:summary="Enter approximate radius of area of interest in km"
+        android:inputType="numberDecimal"
+        />
+
+    <CheckBoxPreference
+        android:key="addownway"
+        android:title="Self tracking"
+        android:summary="Adds own way on the map"
+        android:defaultValue="false" />
+
+    <EditTextPreference
+        android:key="updatetimeinterval"
+        android:title="Enter location update time interval in seconds"
+        android:inputType="number"
+        android:dependency="addownway"
+        />
+
+    <EditTextPreference
+        android:key="mindistance"
+        android:title="Enter minimum distance for location update in meters"
+        android:inputType="number"
+        android:dependency="addownway"
+        />
+
+    <CheckBoxPreference
+        android:key="recviasms"
+        android:title="Receive coordinates via SMS"
+        android:defaultValue="false" />
+    <!--      android:summary="this screen can be accessed via settings" -->
+
+    <EditTextPreference
+        android:key="sendingphone"
+        android:title="Enter sending phone"
+        android:inputType="phone"
+        android:maxLines="1"
+        android:dependency="recviasms"/>
+
+    <CheckBoxPreference
+        android:key="receiveviafacebook"
+        android:title="Receiving data via Facebook"
+        android:defaultValue="false" />
+    <EditTextPreference
+        android:key="fbname"
+        android:title="Facebook name"
+        android:dependency="receiveviafacebook"
+        />
+    <EditTextPreference
+        android:key="fbpwd"
+        android:title="Facebook password"
+        android:dependency="receiveviafacebook"
+        />
+
+    <CheckBoxPreference
+        android:key="receiveviatwitter"
+        android:title="Receive data via Twitter"
+        android:defaultValue="false" />
+    <EditTextPreference
+        android:key="twname"
+        android:title="Twitter name"
+        android:dependency="receiveviatwitter"
+        />
+    <EditTextPreference
+        android:key="twpwd"
+        android:title="Twitter password"
+        android:dependency="receiveviatwitter"
+        />
+
+    <CheckBoxPreference
+        android:key="dontshow_s"
+        android:title="Do not show this screen again"
+        android:summary="this screen can be accessed via settings"
+        android:defaultValue="false" />
+
+</PreferenceScreen>

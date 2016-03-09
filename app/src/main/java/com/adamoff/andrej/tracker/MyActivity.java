@@ -17,14 +17,14 @@ public class MyActivity extends Activity {
     //    String lngtxt = sms.substring(sms.indexOf("lng:")+4);
       // if (lattxt.length()>0)
 
-        String[] strValues = sms.split(",");
-        double latitude = Double.parseDouble(strValues[2]) * .01;
-        double longitude = Double.parseDouble(strValues[4]) * .01;
+//        String[] strValues = sms.split(",");
+//        double latitude = Double.parseDouble(strValues[2]) * .01;
+//        double longitude = Double.parseDouble(strValues[4]) * .01;
       //     double lat = Double.parseDouble(lattxt);
      //  if (lngtxt.length()>0)
       //     double lng = Double.parseDouble(lngtxt);
 
-        startActivity(new Intent(this, MapsActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra("lat",latitude).putExtra("lng",longitude));
+        startActivity(new Intent(this, MapsActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra("sms",sms).putExtra("mode","track")); //.putExtra("lng",longitude));
         finish();
     }
 

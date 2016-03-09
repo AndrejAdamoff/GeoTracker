@@ -37,10 +37,11 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class GeoSender extends AppCompatActivity {
+public class GeoSender extends Activity {
 
-    TextView txtlat, txtlong, prec, satnmb, gpsstat, dist;
+    TextView txtlat, txtlong, prec, satnmb, gpsstat, txtspeed, txttest;
     EditText etphone, etperiod, sendperiod;
+    Button stopbtn;
     String phone, period, sndperiod;
     String gpsstatus;
 
@@ -48,7 +49,7 @@ public class GeoSender extends AppCompatActivity {
     int smsNumber;
     int smssndint, mindist, locupdperiod;
     float accuracy;
-    double latitude, longitude;
+    double latitude, longitude,speed;
 
     LocationManager lm;
     LocationListener listener;
@@ -61,6 +62,8 @@ public class GeoSender extends AppCompatActivity {
     FileOutputStream fos;
  //   BufferedOutputStream bos; // = new BufferedOutputStream(fos);
     OutputStreamWriter out;
+
+    BroadcastReceiver mybroadcast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +90,7 @@ public class GeoSender extends AppCompatActivity {
                         }
                         satellites++;
                     }
-                    satnmb.setText("Satellites used in fix: "+satellitesInFix+"\n"+"Satellites in total: "+satellites);
+                    satnmb.setText("Number of visible satellites: "+satellites+"\n"+"Satellites used in fix: "+satellitesInFix);
                 }
            }
         };
@@ -102,6 +105,7 @@ public class GeoSender extends AppCompatActivity {
              latitude = loc.getLatitude();
              longitude = loc.getLongitude();
              accuracy = loc.getAccuracy();
+             speed = loc.getSpeed();
          //       Toast.makeText(GeoSender.this, "lat: "+location.getLatitude()+"\n"+"long: "+location.getLongitude(), Toast.LENGTH_LONG).show();
 
              txtlat.setText("Lat: " + latitude);
@@ -109,13 +113,15 @@ public class GeoSender extends AppCompatActivity {
        //      gpsstat.setText("GPS status: " + gpsstatus);
          //    satnmb.setText("Number of satellites: " + loc.ge);
              prec.setText("Accuracy: " + accuracy);
+             txtspeed.setText ("Speed: "+ speed);
 
-                if (m) {
+                if (m) {  // time to send sms
                 m=false;
                 smsNumber++;
                 String lat = Double.toString(latitude);
                 String lng = Double.toString(longitude);
-                sendSMS (phone,lat,lng);
+                String sp = Double.toString(speed);
+                sendSMS (phone,lat,lng,sp);
                 }
             }
 
@@ -227,8 +233,12 @@ public class GeoSender extends AppCompatActivity {
         txtlat = (TextView)findViewById(R.id.txtlat);
         txtlong = (TextView)findViewById(R.id.txtlong);
         prec = (TextView)findViewById(R.id.prec);
+        txtspeed = (TextView)findViewById(R.id.txtspeed);
         gpsstat = (TextView)findViewById(R.id.gpsstat);
         satnmb = (TextView)findViewById(R.id.satnmb);
+        txttest = (TextView)findViewById(R.id.txttest);
+        txttest.setVisibility(View.INVISIBLE);
+
      /*   etphone = (EditText)findViewById(R.id.etphone);
         etperiod = (EditText)findViewById(R.id.etperiod);
         dist = (TextView)findViewById(R.id.mindist);
@@ -240,9 +250,14 @@ public class GeoSender extends AppCompatActivity {
         mindist = Integer.valueOf(sp.getString("mindistance", "10"));
         smssndint = Integer.valueOf(sp.getString("smssendinginterval", "3"));
 
+        try {if (getIntent().getStringExtra("mode").equals("testSMS"))
+                 txttest.setVisibility(View.VISIBLE);
+        }
+        catch (Exception e){}
+
         final Button startwithlog = (Button)findViewById(R.id.startwithlog);
       //  Button startnolog = (Button) findViewById(R.id.startnolog);
-        final Button stopbtn = (Button)findViewById(R.id.stopbtn);
+        stopbtn = (Button)findViewById(R.id.stopbtn);
         stopbtn.setClickable(false);
     //    stopbtn.setText("Stopped");
     //    startwithlog.setText("Start");
@@ -297,6 +312,14 @@ public class GeoSender extends AppCompatActivity {
                 stopbtn.setClickable(true);
                 stopbtn.setText("Stop");
 
+                try {if (getIntent().getStringExtra("mode").equals("testSMS"))
+                { mybroadcast = new SMSReceiver();
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction("android.provider.Telephony.SMS_RECEIVED");
+                    registerReceiver(mybroadcast, filter);
+                  }
+                }
+                catch (Exception e){}
             }
         });
 
@@ -311,6 +334,7 @@ public class GeoSender extends AppCompatActivity {
 
                     lm.removeUpdates(listener);
                     lm.removeNmeaListener(nmealistener);
+        Toast.makeText(GeoSender.this, "listeners are removed", Toast.LENGTH_LONG).show();
 
                 //save log in a file:
               //     try {saveFile(M, "GeoLog.txt");}
@@ -322,9 +346,12 @@ public class GeoSender extends AppCompatActivity {
                   //  bos.flush();
                     fos.close();
                 } catch (Exception e) {e.printStackTrace();}
-
-
-
+                try { if (getIntent().getStringExtra("mode").equals("testSMS"))
+                {unregisterReceiver(mybroadcast);
+             //    txttest.setVisibility(View.INVISIBLE);
+                }
+                }
+                catch (Exception e){}
             }
           //      catch (SecurityException s) {
           //          s.printStackTrace();}
@@ -334,19 +361,6 @@ public class GeoSender extends AppCompatActivity {
     //    List<String> providers = lm.getAllProviders();
     //    for (String prov : providers ) {
     //        txt1.setText(prov+"\n");}
-
-
-
-    }
-
-    private void addtoLog (String s){
-
-
-
-    }
-
-    private void sendLog(String[] s){
-
 
     }
 
@@ -400,7 +414,7 @@ public class GeoSender extends AppCompatActivity {
 
 
 
-    public void sendSMS (String phoneNumber, String latitude, String longitude ){
+    public void sendSMS (String phoneNumber, String latitude, String longitude, String speed ){
 
         String SENT="SMS_SENT";
         String DELIVERED="SMS_DELIVERED";
@@ -441,7 +455,7 @@ public class GeoSender extends AppCompatActivity {
             }
         }, new IntentFilter(SENT));
 
-        String message = latitude+","+longitude;
+        String message = System.currentTimeMillis()+","+latitude+","+longitude+","+speed;
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber,null, message, sentPI, deliveredPI);
 
@@ -484,12 +498,10 @@ public class GeoSender extends AppCompatActivity {
 
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-  //      getMenuInflater().inflate(R.menu.activity_geosender, menu);
+        getMenuInflater().inflate(R.menu.menu_mapsactivity, menu);
         return true;
     }
 
@@ -501,9 +513,10 @@ public class GeoSender extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-   //     if (id == R.id.action_settings) {
-  //          return true;
-  //      }
+       if (id == R.id.action_settings) {
+        startActivity(new Intent(this,SettingsGeoSender.class));
+        return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -512,5 +525,11 @@ public class GeoSender extends AppCompatActivity {
         SimpleDateFormat sdfDate = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");//dd/MM/yyyy
         Date now = new Date();
         return sdfDate.format(now);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopbtn.performClick();
     }
 }

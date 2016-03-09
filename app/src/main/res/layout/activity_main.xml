@@ -17,36 +17,36 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Sender"
+            android:text="Send coordinates"
             android:id="@+id/senderbtn"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_weight="1"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:clickable="true" />
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Map"
+            android:text="Track object on map"
             android:id="@+id/mapbtn"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_weight="1"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:clickable="true" />
 
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Both"
+            android:text="Self\ntest\n"
             android:id="@+id/bothbtn"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_weight="1"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:clickable="true" />
     </LinearLayout>
 </RelativeLayout>

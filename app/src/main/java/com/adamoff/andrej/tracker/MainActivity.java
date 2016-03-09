@@ -1,6 +1,11 @@
 package com.adamoff.andrej.tracker;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,7 +14,7 @@ import android.view.View;
 import android.widget.Button;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,18 +32,28 @@ public class MainActivity extends ActionBarActivity {
                 switch (view.getId()){
 
                     case R.id.senderbtn:
+                        if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                            .getBoolean("dontshow_s", false))
                     startActivity(new Intent(MainActivity.this, SettingsGeoSender.class));
+                        else startActivity(new Intent(MainActivity.this, GeoSender.class));
+
                         break;
 
                     case R.id.mapbtn:
-                        startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                        if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                                .getBoolean("dontshow_m", false))
+                        startActivity((new Intent(MainActivity.this, SettingsMap.class)).putExtra("mode","receive"));
+                        else startActivity((new Intent(MainActivity.this, MapsActivity.class)).putExtra("mode","receive"));
                         break;
 
                     case R.id.bothbtn:
+                     //   if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+                     //           .getBoolean("dontshow_m", false))
+                            startActivity((new Intent(MainActivity.this, GeoSender.class)).putExtra("mode","testSMS"));
+                     //   else startActivity((new Intent(MainActivity.this, MapsActivity.class)).putExtra("mode","selftrack"));
+
                         break;
-
                 }
-
             }
         };
 
@@ -46,7 +61,6 @@ public class MainActivity extends ActionBarActivity {
         mapbtn.setOnClickListener(l);
         bothbtn.setOnClickListener(l);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

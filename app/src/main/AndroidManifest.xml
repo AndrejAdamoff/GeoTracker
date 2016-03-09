@@ -39,7 +39,8 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent">
 
             <!--
             <intent-filter>
@@ -50,35 +51,47 @@
             -->
         </activity>
 
-        <receiver
+  <!--      <receiver
             android:name=".SMSReceiver"
             android:enabled="true"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
-        </receiver>
+        </receiver> -->
 
         <activity android:name=".MyActivity" >
         </activity>
+
         <activity
             android:name=".GeoSender"
             android:label="@string/title_activity_activity_sender"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent">
+     <!--       android:theme="@style/Theme.AppCompat.Light.DarkActionBar" -->
         </activity>
+
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main" >
+            android:label="@string/title_activity_main"
+            android:theme="@android:style/Theme.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SettingsGeoSender"
-            android:label="@string/title_activity_settings_geo_sender"
+            android:label="Settings"
             android:theme="@android:style/Theme.Holo" >
+        </activity>
+
+        <activity
+            android:name=".SettingsMap"
+            android:label="Settings"
+            android:theme="@android:style/Theme.Holo">
         </activity>
     </application>
 
