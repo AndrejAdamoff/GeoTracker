@@ -293,7 +293,7 @@ public class GeoSender extends Activity {
                //      bos = new BufferedOutputStream(fos);
                      out = new OutputStreamWriter(fos);
                  Toast.makeText(GeoSender.this, "Creating log file:"+"\n"+logfile, Toast.LENGTH_LONG).show();
-              }
+                  }
               catch (Exception e){
                      e.printStackTrace();
                  Toast.makeText(GeoSender.this, "file is NOT created",Toast.LENGTH_LONG).show();
