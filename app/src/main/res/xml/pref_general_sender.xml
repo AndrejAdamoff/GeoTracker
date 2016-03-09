@@ -54,7 +54,6 @@
         android:title="Sending Email password"
         android:dependency="sendviaEmail"
         />
-
     <EditTextPreference
         android:key="recemail"
         android:title="Receiving Email"
