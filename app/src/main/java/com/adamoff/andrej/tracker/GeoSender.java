@@ -121,7 +121,9 @@ public class GeoSender extends Activity {
                 String lat = Double.toString(latitude);
                 String lng = Double.toString(longitude);
                 String sp = Double.toString(speed);
-                sendSMS (phone,lat,lng,sp);
+                //    double acc = Double.valueOf(accuracy);
+                String accur = Double.toString((Math.round(accuracy*10)/10));   // round accuracy for 1 decimal place
+                sendSMS (phone,lat,lng,sp,accur);
                 }
             }
 
@@ -292,7 +294,7 @@ public class GeoSender extends Activity {
                        fos = new FileOutputStream(logfile);
                //      bos = new BufferedOutputStream(fos);
                      out = new OutputStreamWriter(fos);
-                 Toast.makeText(GeoSender.this, "Creating log file:"+"\n"+logfile, Toast.LENGTH_LONG).show();
+                 Toast.makeText(GeoSender.this, "Creating NMEA log file:"+"\n"+logfile, Toast.LENGTH_LONG).show();
                   }
               catch (Exception e){
                      e.printStackTrace();
@@ -414,7 +416,7 @@ public class GeoSender extends Activity {
 
 
 
-    public void sendSMS (String phoneNumber, String latitude, String longitude, String speed ){
+    public void sendSMS (String phoneNumber, String latitude, String longitude, String speed, String accuracy ){
 
         String SENT="SMS_SENT";
         String DELIVERED="SMS_DELIVERED";
@@ -455,7 +457,7 @@ public class GeoSender extends Activity {
             }
         }, new IntentFilter(SENT));
 
-        String message = System.currentTimeMillis()+","+latitude+","+longitude+","+speed;
+        String message = System.currentTimeMillis()+","+latitude+","+longitude+","+speed+","+accuracy;
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber,null, message, sentPI, deliveredPI);
 

@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,9 +42,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // FragmentActivity вместо Activity нужно для поддержки Support...
 
     private GoogleMap mMap;
-    double lat, lat0, lng, lng0, latp, lngp, speed;
+    double lat, lat0, lng, lng0, latp, lngp, speed,accuracy;
     int mindist, mininterval;
     String mode;
+
+    TextView sinfo, oinfo;
 
     SupportMapFragment mapFragment;
     Location loc;
@@ -54,7 +57,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Handler handler;
     boolean selftrack, addownway;
     boolean n,m;
-    ArrayList<LatLng> route;
+    ArrayList<String> route;
 
     SharedPreferences sp;
 
@@ -72,9 +75,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mindist = Integer.valueOf(sharedPreferences.getString("mindistance", "10"));
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, mininterval, mindist, listener); //handler.post(mRunnable);
                     // }
-
+                    oinfo.setVisibility(View.VISIBLE);
                 } else {
                     locationManager.removeUpdates(listener);
+                    oinfo.setVisibility(View.INVISIBLE);
                 }
             }
             if (s.equals("updatetimeinterval")) {
@@ -128,13 +132,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mybroadcast = new SMSReceiver();
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.registerOnSharedPreferenceChangeListener(splistener);
     //    mode = getIntent().getStringExtra("mode");
 
         setContentView(R.layout.activity_maps);
-        final TextView info = (TextView)findViewById(R.id.info);
+        sinfo = (TextView)findViewById(R.id.sinfo);
+        oinfo = (TextView)findViewById(R.id.oinfo);
+        oinfo.setVisibility(View.INVISIBLE);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
 // ------------- location listener -----------------------------------------------------
@@ -180,7 +185,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Toast.makeText(MapsActivity.this, "Exception 90", Toast.LENGTH_LONG).show();
                     }
 
-                    info.setText("Accuracy:" + loc.getAccuracy() + "\n" + "Speed: " + loc.getSpeed());
+                    oinfo.setText("Accuracy:" + loc.getAccuracy() + "\n" + "Speed: " + loc.getSpeed());
                     if (loc.getSpeed() == 0)
                         mMap.addMarker(new MarkerOptions()
                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_arrow_downward_black_24dp))
@@ -230,6 +235,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (sp.getBoolean("recviasms", false)) {
       //      selftrack = false;
+            mybroadcast = new SMSReceiver();
             IntentFilter filter = new IntentFilter();
             filter.addAction("android.provider.Telephony.SMS_RECEIVED");
             registerReceiver(mybroadcast, filter);
@@ -243,6 +249,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if (sp.getBoolean("addownway", false)) {
+            oinfo.setVisibility(View.VISIBLE);
             mininterval = Integer.valueOf(sp.getString("updatetimeinterval", "10"));
             mindist = Integer.valueOf(sp.getString("mindistance", "10"));
    Toast.makeText(MapsActivity.this, "time interval"+mininterval+"\n"+"distance"+mindist,Toast.LENGTH_LONG).show();
@@ -312,11 +319,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             //     Toast.makeText(MapsActivity.this, "onNewIntent", Toast.LENGTH_LONG).show();
             String sms = intent.getStringExtra("sms");
+//        route.add
             String[] strValues = sms.split(",");
             double time = Double.parseDouble(strValues[0]);
             lat = Double.parseDouble(strValues[1]);
             lng = Double.parseDouble(strValues[2]);
             speed = Double.parseDouble(strValues[3]);
+        accuracy = Double.parseDouble(strValues[4]);
+
+        sinfo.setText("Accuracy:" + accuracy + "\n" + "Speed: " + speed);
 
             //    lat = intent.getDoubleExtra("lat", lat0);
             //    lng = intent.getDoubleExtra("lng", lng0);
@@ -469,6 +480,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onDestroy() {
         super.onDestroy();
         locationManager.removeUpdates(listener);
-        unregisterReceiver(mybroadcast);
+        try {unregisterReceiver(mybroadcast);}
+        catch (Exception e){}
     }
 }

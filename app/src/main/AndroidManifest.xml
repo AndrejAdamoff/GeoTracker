@@ -74,7 +74,9 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@android:style/Theme.Translucent">
+            android:theme="@android:style/Theme.Translucent"
+            android:screenOrientation="sensor" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

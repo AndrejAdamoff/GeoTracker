@@ -9,28 +9,30 @@
         android:layout_height="match_parent">
 
         <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        xmlns:map="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:id="@+id/map" tools:context=".MapsActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        tools:layout="@layout/abc_action_menu_layout" />
+            xmlns:tools="http://schemas.android.com/tools"
+            xmlns:map="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/map" tools:context=".MapsActivity"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            tools:layout="@layout/abc_action_menu_layout" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Info:"
-            android:id="@+id/info"
+            android:id="@+id/sinfo"
             android:textSize="20dp"
             android:background="#00ffffff"
-            android:textColor="#fffd00ff" />
+            android:textColor="#ffff0000" />
 
-        <Button
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Update\nlocation"
-            android:id="@+id/updlocbtn"
-            android:layout_gravity="center_horizontal|bottom"
-            android:textSize="20dp" />
+            android:text="Info:"
+            android:id="@+id/oinfo"
+            android:textSize="20dp"
+            android:background="#00ffffff"
+            android:textColor="#ffffff00"
+            android:layout_gravity="right|top" />
 
     </FrameLayout>
 

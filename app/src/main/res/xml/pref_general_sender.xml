@@ -2,13 +2,15 @@
 
     <EditTextPreference
         android:key="updatetimeinterval"
-        android:title="Enter location update time interval in seconds"
+        android:title="Location update time interval"
+        android:summary="in seconds"
         android:inputType="number"
         />
 
     <EditTextPreference
         android:key="mindistance"
-        android:title="Enter minimum distance for location update in meters"
+        android:title="Minimum distance change for location update"
+        android:summary="in meters"
         android:inputType="number"
         />
 
@@ -18,17 +20,17 @@
         android:defaultValue="false" />
   <!--      android:summary="this screen can be accessed via settings" -->
 
-
     <EditTextPreference
         android:key="receivingphone"
         android:title="Enter receiving phone"
+        android:summary="in international standard"
         android:inputType="phone"
         android:maxLines="1"
         android:dependency="sendviasms"/>
 
     <EditTextPreference
         android:key="smssendinginterval"
-        android:title="Enter SMS sending interval in minutes"
+        android:title="SMS sending interval in minutes"
         android:inputType="number"
         android:dependency="sendviasms"
         />
@@ -36,6 +38,7 @@
     <EditTextPreference
         android:key="smslength"
         android:title="Max number of SMS sent at once"
+        android:summary="not available yet"
         android:inputType="number"
         android:dependency="sendviasms"
         />
@@ -43,6 +46,7 @@
     <CheckBoxPreference
         android:key="sendviafacebook"
         android:title="Send data via Facebook"
+        android:summary="not available in this version"
         android:defaultValue="false" />
     <EditTextPreference
         android:key="fbname"
@@ -58,6 +62,7 @@
     <CheckBoxPreference
         android:key="sendviatwitter"
         android:title="Send data via Twitter"
+        android:summary="not available in this version"
         android:defaultValue="false" />
     <EditTextPreference
         android:key="twname"
@@ -67,6 +72,7 @@
     <EditTextPreference
         android:key="twpwd"
         android:title="Twitter password"
+        android:summary="not available in this version"
         android:dependency="sendviatwitter"
         />
 
